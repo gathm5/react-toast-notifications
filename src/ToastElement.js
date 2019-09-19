@@ -121,17 +121,17 @@ const Countdown = ({ autoDismissTimeout, opacity, isRunning, ...props }) => (
   />
 );
 
-const Icon = ({ appearance, autoDismiss, autoDismissTimeout, isRunning }) => {
+const Icon = ({ theme, appearance, autoDismiss, autoDismissTimeout, isRunning }) => {
   const meta = appearances[appearance];
   const Glyph = meta.icon;
 
   return (
     <div
       css={{
-        backgroundColor: meta.fg,
+        backgroundColor: theme && theme.fg ? theme.fg : meta.fg,
         borderTopLeftRadius: borderRadius,
         borderBottomLeftRadius: borderRadius,
-        color: meta.bg,
+        color: theme && theme.bg ? theme.bg : meta.bg,
         flexShrink: 0,
         paddingBottom: gutter,
         paddingTop: gutter,
@@ -175,6 +175,7 @@ const toastStates = (placement: Placement) => ({
 });
 
 const ToastElement = ({
+  theme,
   appearance,
   placement,
   transitionDuration,
@@ -184,18 +185,15 @@ const ToastElement = ({
   const [height, setHeight] = useState('auto');
   const elementRef: ElementRef<*> = useRef(null);
 
-  useEffect(
-    () => {
-      if (transitionState === 'entered') {
-        const el = elementRef.current;
-        setHeight(el.offsetHeight + gutter);
-      }
-      if (transitionState === 'exiting') {
-        setHeight(0);
-      }
-    },
-    [transitionState]
-  );
+  useEffect(() => {
+    if (transitionState === 'entered') {
+      const el = elementRef.current;
+      setHeight(el.offsetHeight + gutter);
+    }
+    if (transitionState === 'exiting') {
+      setHeight(0);
+    }
+  }, [transitionState]);
 
   return (
     <div
@@ -207,10 +205,10 @@ const ToastElement = ({
     >
       <div
         css={{
-          backgroundColor: appearances[appearance].bg,
+          backgroundColor: theme && theme.bg ? theme.bg : appearances[appearance].bg,
           borderRadius,
           boxShadow: '0 3px 8px rgba(0, 0, 0, 0.175)',
-          color: appearances[appearance].text,
+          color: theme && theme.text ? theme.text : appearances[appearance].text,
           display: 'flex',
           marginBottom: gutter,
           transition: `transform ${transitionDuration}ms cubic-bezier(0.2, 0, 0, 1), opacity ${transitionDuration}ms`,
@@ -253,9 +251,11 @@ export const DefaultToast = ({
   transitionState,
   onMouseEnter,
   onMouseLeave,
+  theme,
   ...otherProps
 }: ToastProps) => (
   <ToastElement
+    theme={theme}
     appearance={appearance}
     placement={placement}
     transitionState={transitionState}
@@ -265,6 +265,7 @@ export const DefaultToast = ({
     {...otherProps}
   >
     <Icon
+      theme={theme}
       appearance={appearance}
       autoDismiss={autoDismiss}
       autoDismissTimeout={autoDismissTimeout}
